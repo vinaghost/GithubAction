@@ -1,0 +1,24 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Get body PR
+on:
+  pull_request:
+    branches-ignore: [master]
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comment on PR when success
+        uses: actions/github-script@0.3.0
+        if: |
+          github.event_name == 'pull_request' && success()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
+            github.issues.createComment({ issue_number, owner, repo, body: "Body: ${{ github.event.pull_request.body }}" });
+
