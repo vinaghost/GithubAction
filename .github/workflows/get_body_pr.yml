@@ -16,7 +16,7 @@ jobs:
        - name: 'Create changelog'
          id: Changelog
          run: |
-          echo "::set-output name=changelog::${github.event.pull_request.body}"
+          echo "::set-output name=changelog::${{github.event.pull_request.body}}"
   build:
     runs-on: ubuntu-latest
     needs: changelog
