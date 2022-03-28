@@ -10,13 +10,17 @@ on:
 jobs:
   changelog:
     runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.Changelog.outputs.changelog }}
     steps:
        - name: 'Create changelog'
          id: Changelog
          run: |
-          echo "${{github.event.pull_request.body}}<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          changelog="${{github.event.pull_request.body}}"
+          changelog="${changelog//'%'/'%25'}"
+          changelog="${changelog//$'\n'/'%0A'}"
+          changelog="${changelog//$'\r'/'%0D'}"
+          echo "::set-output name=changelog::$changelog"
   build:
     runs-on: ubuntu-latest
     needs: changelog
@@ -29,5 +33,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
-            github.issues.createComment({ issue_number, owner, repo, body: "Body: ${{env.CHANGELOG}}" });
+            github.issues.createComment({ issue_number, owner, repo, body: "Body: ${{needs.changelog.outputs.changelog}}" });
 
